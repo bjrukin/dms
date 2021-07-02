@@ -1,6 +1,6 @@
 <?php
-phpinfo();
-exit;
+//phpinfo();
+//exit;
 /**
  * CodeIgniter
  *
