@@ -74,12 +74,12 @@ $active_group = 'default';
 $query_builder = TRUE;
 
 $db['default'] = array(
-	'dsn'	   => 'pgsql:host=localhost;port=5432;dbname=cgdms_2019_11_25;user=postgres;password=admin123',
+	'dsn'	   => 'pgsql:host=ec2-107-22-245-82.compute-1.amazonaws.com;port=5432;dbname=dc7ih4o0v76clp;user=dxirbhzqghuwnr;password=a8ad307978b3a8551a7abe72298f38a1ad6fde9995e1378047e574435d975629',
 	// 'dsn'	   => 'pgsql:host=localhost;port=5432;dbname=cgdms_2019_08_22;user=postgres;password=admin123',
-	'hostname' => 'localhost',
-	'username' => 'postgres',
-	'password' => 'admin123',
-	'database' => 'cgdms_2019_11_25', 
+	'hostname' => 'ec2-107-22-245-82.compute-1.amazonaws.com',
+	'username' => 'dxirbhzqghuwnr',
+	'password' => 'a8ad307978b3a8551a7abe72298f38a1ad6fde9995e1378047e574435d975629',
+	'database' => 'dc7ih4o0v76clp', 
 	// 'database' => 'cgdms_2019_08_22', 
 	'dbdriver' => 'pdo',
 	'dbprefix' => '',
