@@ -1,0 +1,32 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+
+ERROR - 2021-02-11 10:58:31 --> Severity: Notice --> Trying to get property of non-object D:\xampp\htdocs\cgdms\modules\sparepart_orders\views\admin\dealer_order.php 42
+ERROR - 2021-02-11 10:58:31 --> Severity: Notice --> Trying to get property of non-object D:\xampp\htdocs\cgdms\modules\sparepart_orders\views\admin\dealer_order.php 42
+ERROR - 2021-02-11 10:58:31 --> Severity: Notice --> Trying to get property of non-object D:\xampp\htdocs\cgdms\modules\sparepart_orders\views\admin\dealer_order.php 42
+ERROR - 2021-02-11 10:58:31 --> Could not find the language line "sparepart_id"
+ERROR - 2021-02-11 10:58:31 --> Could not find the language line "sparepart_id"
+ERROR - 2021-02-11 10:58:31 --> Could not find the language line "sparepart_id"
+ERROR - 2021-02-11 10:58:31 --> Could not find the language line "sparepart_id"
+ERROR - 2021-02-11 11:13:22 --> Could not find the language line "edit_outsidework"
+ERROR - 2021-02-11 11:13:22 --> Could not find the language line "delete_outsidework"
+ERROR - 2021-02-11 11:25:48 --> Could not find the language line "part"
+ERROR - 2021-02-11 11:27:01 --> Could not find the language line "zone"
+ERROR - 2021-02-11 11:27:30 --> Could not find the language line "zone"
+ERROR - 2021-02-11 14:42:49 --> Could not find the language line "binning_confirm"
+ERROR - 2021-02-11 14:42:49 --> Could not find the language line "binning_list"
+ERROR - 2021-02-11 14:42:49 --> Could not find the language line "binning_confirm"
+ERROR - 2021-02-11 14:42:49 --> Could not find the language line "binning_list"
+ERROR - 2021-02-11 14:42:49 --> Could not find the language line "msil_orders_spareparts"
+ERROR - 2021-02-11 15:46:13 --> Could not find the language line "binning_confirm"
+ERROR - 2021-02-11 15:46:13 --> Could not find the language line "binning_list"
+ERROR - 2021-02-11 15:46:13 --> Could not find the language line "binning_confirm"
+ERROR - 2021-02-11 15:46:13 --> Could not find the language line "binning_list"
+ERROR - 2021-02-11 15:46:13 --> Could not find the language line "msil_orders_spareparts"
+ERROR - 2021-02-11 16:07:54 --> Could not find the language line "latest_part_code"
+ERROR - 2021-02-11 16:07:54 --> Could not find the language line "stock_value"
+ERROR - 2021-02-11 16:17:29 --> Could not find the language line "crm_reports"
+ERROR - 2021-02-11 16:17:29 --> Could not find the language line "crm_reports"
+ERROR - 2021-02-11 17:31:05 --> Could not find the language line "crm_reports"
+ERROR - 2021-02-11 17:31:05 --> Could not find the language line "crm_reports"
+ERROR - 2021-02-11 17:31:06 --> Could not find the language line "latest_part_code"
+ERROR - 2021-02-11 17:31:06 --> Could not find the language line "stock_value"

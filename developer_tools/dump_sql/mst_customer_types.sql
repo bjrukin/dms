@@ -1,0 +1,6 @@
+INSERT INTO "mst_customer_types" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (1, 1, 1, NULL, '2016-6-30 16:53:41', '2016-6-30 16:53:41', NULL, 'First Tyme Buyer', 1);
+INSERT INTO "mst_customer_types" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (2, 1, 1, NULL, '2016-6-30 16:53:44', '2016-6-30 16:53:44', NULL, 'Additional Buyer', 2);
+INSERT INTO "mst_customer_types" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (3, 1, 1, NULL, '2016-6-30 16:53:48', '2016-6-30 16:53:48', NULL, 'Suzuki to Suzuki Exchange', 3);
+INSERT INTO "mst_customer_types" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (4, 1, 1, NULL, '2016-6-30 16:53:52', '2016-7-12 16:44:12', NULL, 'Other Brand to Suzuki Exchange', 4);
+
+ALTER SEQUENCE mst_customer_types_id_seq RESTART WITH 5;

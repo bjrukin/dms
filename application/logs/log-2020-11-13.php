@@ -1,0 +1,20 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+
+ERROR - 2020-11-13 10:15:20 --> Could not find the language line "latest_part_code"
+ERROR - 2020-11-13 10:15:20 --> Could not find the language line "stock_value"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "own_stock"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "own_stock"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "other_dealer_stock"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "quantity"
+ERROR - 2020-11-13 10:15:25 --> Severity: Notice --> Undefined variable: stockyard_id D:\xampp\htdocs\cgdms\modules\sparepart_stocks\views\admin\transfer\dispatch_list.php 25
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "rank"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "type"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "incharge_id"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "user_id"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "stockyard_to"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "dispatch_date_en"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "dispatch_date_np"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "accepted_date_en"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "accepted_date_np"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "own_stock"
+ERROR - 2020-11-13 10:15:25 --> Could not find the language line "other_dealer_stock"

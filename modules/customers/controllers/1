@@ -1,0 +1,19 @@
+<VirtualHost *:80>
+   DocumentRoot "/var/www/html/cgdms"
+   Alias /cghr /var/www/html/cghr
+   <Directory /var/www/html/cgdms/customers/>
+        Order Allow,Deny
+        #Allow from 192.168.0.0/16 10.0.0.0/8 
+        Allow from all
+        #Options -MultiViews -Indexes
+        AllowOverride all
+    </Directory>
+   <Directory /var/www/html/cgdms/>
+        Order Allow,Deny
+        Allow from 192.168.0.0/16 10.0.0.0/8 
+        #Allow from all
+        Options -MultiViews -Indexes
+        AllowOverride all
+    </Directory>
+</VirtualHost>
+

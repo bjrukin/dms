@@ -1,0 +1,220 @@
+<?php 
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * PROJECT
+ *
+ * @package         PROJECT
+ * @author          <AUTHOR_NAME>
+ * @copyright       Copyright (c) 2016
+ */
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Damages
+ *
+ * Extends the Project_Controller class
+ * 
+ */
+
+class Damages extends Project_Controller
+{
+	protected $uploadPath = 'uploads/damage';
+	protected $uploadthumbpath= 'uploads/damage/thumb/';
+	public function __construct()
+	{
+
+		parent::__construct();
+
+		control('Damages');
+
+		$this->load->model('damages/damage_model');
+		$this->lang->load('damages/damage');
+		$this->load->model('dispatch_records/dispatch_record_model');
+		$this->load->model('repairs/repair_model');
+		$this->lang->load('damages/damage');
+	}
+
+	public function index()
+	{
+		// Display Page
+		$data['header'] = lang('damages');
+		$data['page'] = $this->config->item('template_admin') . "index";
+		$data['module'] = 'damages';
+		$this->load->view($this->_container,$data);
+	}
+
+	public function json()
+	{
+		search_params();
+		
+		$total=$this->damage_model->find_count();
+		
+		paging('id');
+		
+		search_params();
+		
+		$rows=$this->damage_model->findAll();
+		
+		echo json_encode(array('total'=>$total,'rows'=>$rows));
+		exit;
+	}
+
+	public function save()
+	{
+        $data=$this->_get_posted_data(); //Retrive Posted Data
+// echo '<pre>';print_r($this->input->post());print_r($data);exit;
+        if(!$this->input->post('id'))
+        {
+        	$success=$this->damage_model->insert($data);
+        }
+        else
+        {
+        	$success=$this->damage_model->update($data['id'],$data);
+        }
+
+        if($success)
+        {
+        	$success = TRUE;
+        	$msg=lang('general_success');
+        }
+        else
+        {
+        	$success = FALSE;
+        	$msg=lang('general_failure');
+        }
+
+        echo json_encode(array('msg'=>$msg,'success'=>$success));
+        exit;
+    }
+
+    private function _get_posted_data()
+    {
+    	$data=array();
+    	if($this->input->post('id')) {
+    		$data['id'] = $this->input->post('id');
+    	}
+    	$data['name'] = $this->input->post('name');
+    	$data['chass_no'] = $this->input->post('chass_no');
+    	$data['description'] = $this->input->post('description');
+    	$data['vehicle_id'] = $this->input->post('vehicle_id');
+		$data['image'] = $this->input->post('image');
+		$data['service_center'] = $this->input->post('service_center');
+		$data['amount'] = $this->input->post('amount');
+		$data['estimated_date_of_repair'] = $this->input->post('estimated_date_of_repair');
+		if($this->input->post('return'))
+		{
+			$data['return'] = $this->input->post('return');
+		}
+
+		return $data;
+	}
+
+
+	public function get_vehicle_details(){
+
+		$vehicle_id = $this->input->post('vehicle_id');
+		$this->damage_model->_table='view_damage_details';
+
+		$this->db->where('vehicle_id',$vehicle_id);
+		$rows=$this->damage_model->findAll();
+//print_r( $this->input->post());
+		echo json_encode($rows);
+	}
+
+
+	public function get_dispatch(){
+
+
+		$this->dispatch_record_model->_table='msil_dispatch_records';
+
+	         // $this->db->where('vehicle_id',$vehicle_id);
+		$records=$this->dispatch_record_model->findAll();
+
+
+		echo json_encode($records);
+	}
+	function upload_image(){
+
+		//Image Upload Config
+		$config['upload_path'] = $this->uploadPath;
+		$config['allowed_types'] = 'gif|png|jpg';
+		$config['max_size']	= '10240';
+		$config['remove_spaces']  = true;
+		//load upload library
+		$this->load->library('upload', $config);
+		if(!$this->upload->do_upload())
+		{
+			$data['error'] = $this->upload->display_errors('','');
+			echo json_encode($data);
+		}
+		else
+		{
+			$data = $this->upload->data();
+			$config['image_library'] = 'gd2';
+			$config['source_image'] = $data['full_path'];
+			$config['new_image']    = $this->uploadthumbpath;
+		  //$config['create_thumb'] = TRUE;
+			$config['maintain_ratio'] = TRUE;
+			$config['height'] =100;
+			$config['width'] = 100;
+
+			$this->load->library('image_lib', $config);
+			$this->image_lib->resize();
+			echo json_encode($data);
+		}
+	}
+	public function Repair_save()
+	{
+        $data=$this->_get_repair_posted_data(); //Retrive Posted Data
+
+        if(!$this->input->post('id'))
+        {
+        	$success=$this->repair_model->insert($data);
+        }
+        else
+        {
+        	$success=$this->repair_model->update($data['id'],$data);
+        }
+
+        if($success)
+        {
+        	$success = TRUE;
+        	$msg=lang('general_success');
+        }
+        else
+        {
+        	$success = FALSE;
+        	$msg=lang('general_failure');
+        }
+
+        echo json_encode(array('msg'=>$msg,'success'=>$success));
+        exit;
+    }
+
+    private function _get_repair_posted_data()
+    {
+    	$data=array();
+    	if($this->input->post('id')) {
+    		$data['id'] = $this->input->post('id');
+    	}
+		// $data['created_by'] = $this->input->post('created_by');
+		// $data['updated_by'] = $this->input->post('updated_by');
+		// $data['deleted_by'] = $this->input->post('deleted_by');
+		// $data['created_at'] = $this->input->post('created_at');
+		// $data['updated_at'] = $this->input->post('updated_at');
+		// $data['deleted_at'] = $this->input->post('deleted_at');
+    	$data['vehicle_name'] = $this->input->post('vehicle_name');
+    	$data['vehicle_id'] = $this->input->post('vehicle_id');
+    	$data['color_name'] = $this->input->post('color_name');
+    	$data['variant_name'] = $this->input->post('variant_name');
+    	$data['description'] = $this->input->post('description');
+    	$data['image'] = $this->input->post('image');
+    	$data['chass_no'] = $this->input->post('chass_no');
+    	$data['engine_no'] = $this->input->post('engine_no');
+
+    	return $data;
+    }
+
+}

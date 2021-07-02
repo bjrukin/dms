@@ -1,0 +1,9 @@
+INSERT INTO "mst_educations" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (1, 1, 1, NULL, '2016-6-30 16:55:54', '2016-6-30 16:55:54', NULL, 'N/A', 1);
+INSERT INTO "mst_educations" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (2, 1, 1, NULL, '2016-6-30 16:55:58', '2016-6-30 16:55:58', NULL, 'School', 2);
+INSERT INTO "mst_educations" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (3, 1, 1, NULL, '2016-6-30 16:56:00', '2016-6-30 16:56:00', NULL, 'Intermediate/+2', 3);
+INSERT INTO "mst_educations" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (4, 1, 1, NULL, '2016-6-30 16:56:03', '2016-6-30 16:56:03', NULL, 'Bachelors', 4);
+INSERT INTO "mst_educations" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (5, 1, 1, NULL, '2016-6-30 16:56:06', '2016-6-30 16:56:06', NULL, 'Masters', 5);
+INSERT INTO "mst_educations" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (6, 1, 1, NULL, '2016-6-30 16:56:08', '2016-6-30 16:56:24', NULL, 'Vocational', 6);
+INSERT INTO "mst_educations" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (7, 1, 1, NULL, '2016-7-12 16:29:54', '2016-7-12 16:44:16', NULL, 'Others', 7);
+
+ALTER SEQUENCE mst_educations_id_seq RESTART WITH 8;

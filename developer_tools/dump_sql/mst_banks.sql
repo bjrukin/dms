@@ -1,0 +1,6 @@
+INSERT INTO "mst_banks" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "code", "rank") VALUES (1, 1, 1, NULL, '2016-8-12 12:19:08', '2016-8-12 12:25:32', NULL, 'Standard Chartered', 'SCBL', 1);
+INSERT INTO "mst_banks" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "code", "rank") VALUES (2, 1, 1, NULL, '2016-8-12 12:19:16', '2016-8-12 12:25:24', NULL, 'NIC Asia', 'NIC Asia', 2);
+INSERT INTO "mst_banks" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "code", "rank") VALUES (3, 1, 1, NULL, '2016-8-12 12:20:12', '2016-8-12 23:13:17', NULL, 'NMB Bank', 'NMB', 3);
+INSERT INTO "mst_banks" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "code", "rank") VALUES (99999, 1, 1, NULL, '2016-8-12 23:31:47', '2016-8-12 23:31:56', NULL, 'Others', 'Others', 4);
+
+ALTER SEQUENCE mst_banks_id_seq RESTART WITH 4;

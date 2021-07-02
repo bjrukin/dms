@@ -1,0 +1,672 @@
+<?php 
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * PROJECT
+ *
+ * @package         PROJECT
+ * @author          <AUTHOR_NAME>
+ * @copyright       Copyright (c) 2016
+ */
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Crm_reports
+ *
+ * Extends the Report_Controller class
+ * 
+ */
+
+class Crm_reports extends Report_Controller
+{
+	public function __construct()
+	{
+    	parent::__construct();
+
+    	control('CRM Reports');
+
+        $this->lang->load('crm_reports/crm_report');
+
+        $this->group   = array();
+        $this->group[] = 'inquiry_conversion_ratio';
+        $this->group[] = 'inquiry_test_ride_conversion_ratio';
+        // $this->group[] = 'inquiry_institution';
+        $this->group[] = 'inquiry_lost_case';
+        $this->group[] = 'inquiry_pending';
+    }
+
+	public function index()
+	{
+		// Display Page
+		$data['header'] = lang('crm_reports');
+		$data['page'] = $this->config->item('template_admin') . "index";
+		$data['module'] = 'crm_reports';
+		$this->load->view($this->_container,$data);
+	}
+
+    public function generate($type = null) 
+    {
+        if ($type==null) 
+        {
+            flashMsg('error', 'Invalid customer ID');
+            redirect('admin/crm-reports');  
+        }
+
+        //default page
+        
+        $show = false;
+        
+        if (in_array($type, $this->group))
+        {
+            $show = true;
+        }
+
+        // Display Page
+        $data['header']                 = lang('crm_reports');
+        $data['page']                   = $this->config->item('template_admin') . "generate";
+        $data['module']                 = 'crm_reports';
+        $data['type']                   = $type;  
+        $data['show']                   = $show;
+        $data['report_type']            = humanize(ucfirst($type));  
+        
+
+        $this->load->view($this->_container,$data);
+    }
+
+    public function get_report_json() 
+    {
+        $report_criteria_index = $this->input->post('report_criteria'); 
+
+        $report_criteria = $this->report_criteria[$report_criteria_index];
+
+        extract($report_criteria);
+
+        $flag = false;
+
+        if (in_array($report_criteria_index, $this->group)){
+            $column = $this->input->post('column_name');
+            $mst_column = "DISTINCT {$column}";
+            
+            $flag = true;
+        }
+
+        $group_name = $group = $this->input->post('group_criteria');
+
+        $column_name = trim(ucwords(str_replace('name', '', str_replace("_", " ", $column))));
+
+        $group_name_label = trim(ucwords(str_replace('name', '', str_replace("_", " ", $group_name))));
+
+        $whereCondition = array();
+        $whereCondition2ndSql = array();
+
+        $where1 = $where2 = null;
+
+        if($this->input->post('date_range')) {
+            $date_range = explode(" - ", $this->input->post('date_range'));
+            if ($date_range[0] != null && $date_range[1] != null) {
+                $whereCondition[] = "(inquiry_date_en >= '".$date_range[0]."' AND inquiry_date_en <= '".$date_range[1]."')";
+            }
+        }
+
+        if ($group == 'month') {
+            $group = "TO_CHAR(DATE(inquiry_date_en),'YYYY-MM') AS month";
+        } 
+
+        // ACCESS LEVEL CHECK STARTS
+        $is_dealer_only = NULL;
+    
+        $dealer_list    = (is_dealer_incharge()) ? get_dealer_list() : NULL; 
+        
+        if (empty($dealer_list)) {
+            $is_dealer_only = (is_dealer_only()) ? TRUE : NULL; 
+        }
+        
+        if(!empty($dealer_list)) {
+            $whereCondition[] = "( dealer_id  IN (" . implode(", ", $dealer_list) . ") ) ";
+            if ($flag) {
+                $whereCondition2ndSql[] = "( dealer_id  IN (" . implode(", ", $dealer_list) . ") ) ";
+            }
+        } elseif ($is_dealer_only) {
+            $whereCondition[] = " ( dealer_id = " . $this->session->userdata('employee')['dealer_id'] . ")";
+            if ($flag) {
+                $whereCondition2ndSql[] = " ( dealer_id = " . $this->session->userdata('employee')['dealer_id'] . ")";
+            }
+        }
+        // ACCESS LEVEL CHECK ENDS
+
+        if (!is_null($condition1)) {
+            $whereCondition[] = $condition1;
+        }
+
+        
+        if (!is_null($condition2)) {
+            $whereCondition2ndSql[] = $condition2;
+        }
+        
+        if (!empty($whereCondition)) {
+            $where1 = " WHERE " . implode(" AND " , $whereCondition);
+        }
+
+        if (!empty($whereCondition2ndSql)) {
+            $where2 = " WHERE " . implode(" AND " , $whereCondition2ndSql);
+        }
+        
+        
+        $columns  = "{$group}, {$column}, count(id) AS ct";
+        $sequence = "1, 2";
+
+        $functionName = 'generate_crosstab_sql';
+
+        if ($this->input->post('export')) {
+            $functionName = 'generate_crosstab_sql_excel';
+        }
+
+        $compare_string = "{$group_name_label} v/s {$column_name}";
+
+        $addSql = '';
+        if ($table == 'mst_inquiry_statuses') {
+            $addSql = "UNION ALL (SELECT DISTINCT 'Retail Finance' as status_name from view_customers) ";
+        }
+ 
+        $sql = <<<EOF
+SELECT
+{$functionName} (
+    $$ WITH cte AS (SELECT {$columns} FROM {$dbview} {$where1} GROUP BY {$sequence} ORDER BY {$sequence} ) TABLE cte UNION ALL SELECT {$group}, 'Total' as {$column}, count(*) FROM {$dbview} {$where1} GROUP BY 1 ORDER BY 1 $$,
+    $$ (SELECT {$mst_column} as {$column} FROM {$table} {$where2} ORDER BY {$order}) {$addSql} UNION ALL (SELECT DISTINCT 'Total' as {$column} from {$dbview}) $$,
+    'INT',
+    '"{$compare_string}"') AS sqlstring
+EOF;
+
+        $res = $this->db->query($sql)->row_array();
+        $results = $this->db->query($res['sqlstring']);
+
+        $records = null;
+        if ($results->num_rows() > 0) {
+           $records = $results->result_array();
+           $success = true;
+        } else{
+            $success = false;
+        }
+        
+        if ($this->input->post('export')) {
+            $date_range = ($this->input->post('date_range')) ? ' ['. $this->input->post('date_range') . ']' : '';
+            $title = humanize(ucfirst($report_criteria_index)) . $date_range;
+
+            if ($records != null && $include_only !=null) 
+            {
+                $reArrange = array();
+                foreach($records as $row)
+                {
+                    $temp = array();
+                    $temp[$compare_string] = $row[$compare_string];
+                    foreach($include_only as $field) {
+                        $c1 = str_replace('<BR>(%)', '', $field);
+                        $c2 = str_replace('<BR>(%)', ' (%)', $field);
+                        $temp[$c1] = $row[$c1];
+                        $temp[$c2] = $row[$c2];
+                    }
+                    $temp['Total'] = $row['Total'];
+                    $reArrange[] = $temp;
+                }
+                $records = $reArrange;
+            }
+
+            $this->export_file($records, $title);
+            exit;
+        } 
+        else {
+            //refine records
+            if ($records != null && $include_only !=null) 
+            {
+                $reArrange = array();
+                foreach($records as $row)
+                {
+                    $temp = array();
+                    $temp[$compare_string] = $row[$compare_string];
+                    foreach($include_only as $field) {
+                        $temp[$field] = $row[$field];
+                    }
+                    $temp['Total'] = $row['Total'];
+                    $reArrange[] = $temp;
+                }
+
+                $records = $reArrange;
+            }
+            echo json_encode(array('success' => $success, 'data' => $records, 'total'=>count($records)));
+            exit;    
+        }
+    } 
+
+    public function excel_export()
+    {
+        $this->get_report_json();
+    }
+
+    public function inquiry_trend()
+    {
+        $data['date_1'] = date("F d, Y", strtotime("-1 months")); 
+        $data['date_2'] = date("F d, Y"); 
+
+        $type = 'inquiry_trend';
+        $data['type']        = $type;  
+        $data['report_type'] = humanize(ucfirst($type));  
+
+        // Display Page
+        $data['header'] = lang('inquiry_trend');
+        $data['page'] = $this->config->item('template_admin') . "inquiry_trend";
+        $data['module'] = 'crm_reports';
+        $this->load->view($this->_container,$data);
+    }
+
+    public function get_datafield_sources() 
+    {
+        $start_date     = $this->input->get('start_date');
+        $end_date       = $this->input->get('end_date');
+        $table_view     = $this->input->get('table_view');
+        $column_name    = $this->input->get('column_name');
+        $group_criteria   = ($this->input->get('group_criteria')) ? $this->input->get('group_criteria') : 'dealer_name';
+
+        if ($group_criteria == 'month') {
+            $sourceArray = array();
+            $sourceArray[] = array('name' => 'Duration', 'type' =>'string');
+            $sourceArray[] = array('name' => 'inquiries', 'type' =>'number');
+
+            $seriesArray = array();
+            $seriesArray[] = array('dataField' => 'inquiries', 'displayText'=> 'Inquiries', 'lineWidth'=> 2 );
+
+            echo json_encode(array('source' => $sourceArray, 'series' => $seriesArray));
+            exit;
+        }
+
+        $conditions     = array();
+        $start_date     = date('Y-m-d', strtotime($start_date));
+        $end_date       = date('Y-m-d', strtotime($end_date));
+        
+        $conditions[]   = " ({$column_name} BETWEEN '{$start_date}' AND '{$end_date}') ";
+        $where_query    = implode(' AND ', $conditions);
+        
+        $q = "SELECT DISTINCT COALESCE( NULLIF(regexp_replace(lower({$group_criteria}), '[^a-zA-Z]', '', 'g'),'') , 'NA' ) AS group_criteria_formatted, {$group_criteria} AS {$group_criteria} FROM {$table_view} WHERE {$where_query} ORDER BY 1";
+
+        $records = $this->db->query($q)->result_array();
+
+        //source
+        $sourceArray = array();
+        $seriesArray = array();
+        if($records) {
+            $sourceArray[] = array('name' => 'Duration', 'type' =>'string');
+            foreach ($records as $record) {
+                $sourceArray[] = array('name' => $record['group_criteria_formatted'], 'type' => 'number');
+                $seriesArray[] = array('dataField' => $record['group_criteria_formatted'], 'displayText'=> ($record[$group_criteria] != NULL) ? $record[$group_criteria] : 'N/A', 'lineWidth'=> 2 );
+            }
+        }
+        echo json_encode(array('source' => $sourceArray, 'series' => $seriesArray));
+    }
+
+    public function inquiry_trend_json()
+    {
+        $date1 = date("Y-m-d", strtotime("-1 months")); 
+        $date2 = date('Y-m-d');     
+        $format = 'YYYY-Mon-DD';
+        $trunc = 'day';
+
+        if ($this->input->get('date_range')) {
+            $date_range = $this->input->get('date_range');
+            $date1 = date('Y-m-d', strtotime($date_range['from']));
+            $date2 = date('Y-m-d', strtotime($date_range['to']));
+        }
+
+        if ($this->input->get('graph_format')) {
+            $format = $this->input->get('graph_format');
+            switch($format){
+                case 'Day':
+                    $format = 'YYYY-Mon-DD';
+                    $trunc = 'day';
+                    break;
+                case 'Month':
+                    $format = 'YYYY-Mon';
+                    $trunc = 'month';
+                    break;
+                case 'Year':
+                    $format = 'YYYY';
+                    $trunc = 'year';
+                    break;
+            }
+        }
+
+        $table_view     = $this->input->get('table_view');
+        $column_name    = $this->input->get('column_name');
+        $group_criteria   = ($this->input->get('group_criteria')) ? $this->input->get('group_criteria') : 'dealer_name';
+
+        $conditions = array();
+        $conditions[] = " ({$column_name} between '{$date1}' AND '{$date2}') ";
+        
+        $where_query = implode(' AND ', $conditions);
+
+        if ($group_criteria != 'month') {
+
+            $sql = <<<EOF
+SELECT
+    generate_crosstab_sql_plain (
+        $$ SELECT DATE_TRUNC('{$trunc}', {$column_name}), TO_CHAR({$column_name},'{$format}') AS month, REGEXP_REPLACE(LOWER({$group_criteria}), '[^a-zA-Z]', '', 'g') AS {$group_criteria}, "count"(*) FROM {$table_view} WHERE {$where_query} GROUP BY 1,2,3 ORDER BY 1,2,3 $$,
+        $$ SELECT DISTINCT REGEXP_REPLACE(lower({$group_criteria}), '[^a-zA-Z]', '', 'g') AS {$group_criteria} FROM {$table_view} WHERE {$where_query} ORDER BY {$group_criteria} $$,
+        'int',
+        '"Date" text,  "Duration" text') AS sqlstring
+    
+EOF;
+            $res = $this->db->query($sql)->row_array();
+            $data = $this->db->query($res['sqlstring'])->result_array();
+        } else {
+            $sql = <<<EOF
+SELECT DATE_TRUNC('{$trunc}', inquiry_date_en) AS "Date", TO_CHAR(inquiry_date_en,'{$format}') AS "Duration", COUNT(*) AS inquiries FROM {$table_view} WHERE {$where_query} GROUP BY 1,2 ORDER BY 1,2;
+EOF;
+            $data = $this->db->query($sql)->result_array();
+        }
+
+        array_walk_recursive($data, array($this,'array_replace_null_by_zero'));
+
+        echo json_encode($data);
+    }
+
+    public function retail_finance()
+    {
+        $data['date_1'] = date("F d, Y", strtotime("-1 months")); 
+        $data['date_2'] = date("F d, Y"); 
+
+        $type = 'retail_finance';
+        $data['type']        = $type;  
+        $data['report_type'] = humanize(ucfirst($type));  
+
+        // Display Page
+        $data['header'] = lang('retail_finance');
+        $data['page'] = $this->config->item('template_admin') . "retail_finance";
+        $data['module'] = 'crm_reports';
+        $this->load->view($this->_container,$data);
+    }
+
+    public function retail_finance_json()
+    {
+        // $report_criteria_index = $this->input->post('report_criteria'); 
+
+        // $report_criteria = $this->report_criteria[$report_criteria_index];
+
+        // extract($report_criteria);
+
+        // $group_name = $group = $this->input->post('group_criteria');
+
+        // $column_name = trim(ucwords(str_replace('name', '', str_replace("_", " ", $column))));
+
+        // $group_name_label = trim(ucwords(str_replace('name', '', str_replace("_", " ", $group_name))));
+
+        $whereCondition = array();
+
+        $where1 = null;
+
+        // $whereCondition[] = ' payment_mode_id = 2 '; 
+
+        if($this->input->post('date_range')) {
+            $date_range = explode(" - ", $this->input->post('date_range'));
+            if ($date_range[0] != null && $date_range[1] != null) {
+               $whereCondition[] = "(inquiry_date_en >= '".$date_range[0]."' AND inquiry_date_en <= '".$date_range[1]."')";
+
+            }
+        }
+
+        $dealer_ids = $this->input->post('dealer_id');
+        if ($dealer_ids != '' && $dealer_ids != 0) {
+            $whereCondition[] = " dealer_id in ($dealer_ids) ";            
+        }
+
+        // ACCESS LEVEL CHECK STARTS
+        // $is_dealer_only = NULL;
+    
+        // $dealer_list    = (is_dealer_incharge()) ? get_dealer_list() : NULL; 
+        
+        // if (empty($dealer_list)) {
+        //     $is_dealer_only = (is_dealer_only()) ? TRUE : NULL; 
+        // }
+        
+        // if(!empty($dealer_list)) {
+        //     $whereCondition[] = "( dealer_id  IN (" . implode(", ", $dealer_list) . ") ) ";
+        // } elseif ($is_dealer_only) {
+        //     $whereCondition[] = " ( dealer_id = " . $this->session->userdata('employee')['dealer_id'] . ")";
+        // }
+        // ACCESS LEVEL CHECK ENDS
+        
+        if (!empty($whereCondition)) {
+            $where1 = " WHERE " . implode(" AND " , $whereCondition);
+        }
+
+        //
+        $table = array();
+        
+        //ROW 1
+        $sql = "SELECT COUNT(*) AS total FROM view_inquiry_retail {$where1}";
+        $result = $this->db->query($sql)->result_array();
+        $total  = $result[0]['total'];
+        
+        $where = ($where1 != null) ? $where1 . ' AND payment_mode_id = 2': ' WHERE  payment_mode_id = 2';
+        $sql = "SELECT COUNT(*) as total FROM view_inquiry_retail {$where}";
+        $result = $this->db->query($sql)->result_array();
+        $financeTotal  = $result[0]['total'];
+        
+        $financeTotal = ($financeTotal > 0) ? $financeTotal : 0;
+        $total = ($total > 0) ? $total : 0;
+
+        $percent = 0;
+        if ($total > 0) {
+            $percent = number_format( (($financeTotal/$total) * 100),2);
+        }
+
+        $table[] = array(
+                        'SN'                    => '1', 
+                        'Performance Measure'   => 'Overall finance % across dealership(Funding Banks on Retail)', 
+                        'UOM'                   => '%', 
+                        'Target'                => '80',
+                        'Actual'                => $percent, 
+                        'Variance'              => abs(80 - $percent)
+                    );
+
+        // ROW 2
+        // $status_id = STATUS_DOCUMENT_COMPLETE;
+        $where = ($where1 != null) ? $where1 . ' AND bank_id <> 99999': ' WHERE bank_id <> 99999';
+        $sql = "SELECT AVG(ir.status_6::date - ir.status_4::date) AS avg_time FROM view_retail_finance ir {$where}";
+        $result = $this->db->query($sql)->result_array();
+        $avg_time = number_format($result[0]['avg_time'],02);
+
+        $table[] = array(
+                        'SN'                    => '2', 
+                        'Performance Measure'   => 'Document Completion Date from booking date <10 days(Funding Banks)', 
+                        'UOM'                   => 'Day', 
+                        'Target'                => '10',
+                        'Actual'                => $avg_time, 
+                        'Variance'              => abs(10 - $avg_time)
+                    );
+
+
+        // ROW 3
+        // $status_id = STATUS_DO_APPROVAL;
+        $where = ($where1 != null) ? $where1 . ' AND bank_id <> 99999': ' WHERE bank_id <> 99999';
+        $sql = "SELECT AVG(ir.status_8::date - ir.status_6::date) AS avg_time FROM view_retail_finance ir {$where}";
+        $result = $this->db->query($sql)->result_array();
+        $avg_time = number_format($result[0]['avg_time'],2);
+        
+        $table[] = array(
+                        'SN'                    => '3', 
+                        'Performance Measure'   => 'DO collection date from Document submission confirmation <5 days', 
+                        'UOM'                   => 'Day', 
+                        'Target'                => '5',
+                        'Actual'                => $avg_time, 
+                        'Variance'              => abs(5 - $avg_time)
+                    );
+
+         // ROW 3a, 3b, 3c
+        $status_id = STATUS_DO_APPROVAL;
+        $where = ($where1 != null) ? $where1 . ' AND bank_id <> 99999': ' WHERE bank_id <> 99999';
+        $sql = "SELECT bank_name, AVG(ir.status_8::date - ir.status_6::date) AS avg_time FROM view_retail_finance ir {$where} GROUP BY 1";
+        $results = $this->db->query($sql)->result_array();
+
+        foreach ($results as $key=>$row) {
+            $avg_time = number_format($row['avg_time'],2);
+
+            $table[] = array(
+                        'SN'                    => '', 
+                        'Performance Measure'   =>  chr(65+$key) .') ' . $row['bank_name'], 
+                        'UOM'                   => 'Day', 
+                        'Target'                => '5',
+                        'Actual'                => $avg_time, 
+                        'Variance'              => abs(5 - $avg_time)
+                    );
+
+        }
+
+        // ROW 4
+        // $status_id = STATUS_PAYMENT_RECEIVED;
+        $where = ($where1 != null) ? $where1 . ' AND bank_id <> 99999': ' WHERE bank_id <> 99999';
+        $sql = "SELECT AVG(ir.status_14::date - ir.status_12::date) AS avg_time FROM view_retail_finance ir {$where}";
+        $result = $this->db->query($sql)->result_array();
+        $avg_time = number_format($result[0]['avg_time'],2);
+        
+        $table[] = array(
+                        'SN'                    => '4', 
+                        'Performance Measure'   => 'Payment collection from security transfer completion date <5 days', 
+                        'UOM'                   => 'Day', 
+                        'Target'                => '5',
+                        'Actual'                => $avg_time, 
+                        'Variance'              => abs(5 - $avg_time)
+                    );
+
+        // ROW 4a, 4b, 4c
+        // $status_id = STATUS_PAYMENT_RECEIVED;
+        $where = ($where1 != null) ? $where1 . ' AND bank_id <> 99999': ' WHERE bank_id <> 99999';
+        $sql = "SELECT bank_name, AVG(ir.status_14::date - ir.status_12::date) AS avg_time FROM view_retail_finance ir {$where} GROUP BY 1";
+        $results = $this->db->query($sql)->result_array();
+
+        foreach ($results as $key=>$row) {
+            $avg_time = number_format($row['avg_time'],2);
+
+            $table[] = array(
+                        'SN'                    => '', 
+                        'Performance Measure'   =>  chr(65+$key) .') ' . $row['bank_name'], 
+                        'UOM'                   => 'Day', 
+                        'Target'                => '5',
+                        'Actual'                => $avg_time, 
+                        'Variance'              => abs(5 - $avg_time)
+                    );
+
+        }
+
+        //ROW 5
+        // $where = ($dateCondition != null) ? " WHERE {$dateCondition} " : '';
+        // $sql = "SELECT COUNT(*) AS total FROM view_customers_all_status {$where}";
+        // $result = $this->db->query($sql)->result_array();
+        // $allTotal  = $result[0]['total'];
+
+        // $where = ($where1 != null) ? $where1 . ' AND (status_5 IS NOT NULL OR status_7 IS NOT NULL)': ' WHERE (status_5 IS NOT NULL OR status_7 IS NOT NULL)';
+        // $sql = "SELECT COUNT(*) AS total FROM view_customers_all_status {$where}";
+        // $results = $this->db->query($sql)->result_array();
+
+        // $percent = 0;
+        // if ($allTotal > 0) {
+        //     $percent = number_format(($results[0]['total']/$allTotal) * 100, 2);
+        // }
+
+        $table[] = array(
+                        'SN'                    => '5', 
+                        'Performance Measure'   => 'Rejection rate <5% of total documents submitted', 
+                        'UOM'                   => '%', 
+                        'Target'                => '5',
+                        'Actual'                => '<b>@TODO</b>', 
+                        'Variance'              => '<b>@TODO</b>'
+                    );
+
+
+
+        //ROW 6
+        $where = ($where1 != null) ? $where1 . ' AND status_9 IS NOT NULL': ' WHERE status_9 IS NOT NULL';
+        $sql = "SELECT COUNT(*) AS total FROM view_retail_finance {$where}";
+        $results = $this->db->query($sql)->result_array();
+
+        $percent = 0;
+        if ($financeTotal > 0) {
+            $percent = number_format(($results[0]['total']/$total) * 100, 2);
+        }
+
+        $table[] = array(
+                        'SN'                    => '6', 
+                        'Performance Measure'   => 'Delivery with DO ', 
+                        'UOM'                   => '%', 
+                        'Target'                => '100',
+                        'Actual'                => $percent, 
+                        'Variance'              => abs(100-$percent)
+                    );
+
+
+        // ROW 7
+        $where = ($where1 != null) ? $where1 . ' AND bank_id <> 99999': ' WHERE bank_id <> 99999 ';
+        $sql = "SELECT COUNT(*) AS total FROM view_retail_finance {$where}";
+        $results = $this->db->query($sql)->result_array();
+
+        $totalMemberBank = $results[0]['total'];
+        
+        $percent = 0;
+        if ($financeTotal > 0) {
+            $percent = number_format(($results[0]['total']/$financeTotal) * 100, 2);
+        }
+
+        $table[] = array(
+                        'SN'                    => '7', 
+                        'Performance Measure'   =>  'Equal Lead distribution to all tied up Banks (No of Leads forwarded)' ,
+                        'UOM'                   => '%', 
+                        'Target'                => '99',
+                        'Actual'                => $percent,
+                        'Variance'              => abs(99 - $percent)
+                    );
+
+
+        // ROW 7a, 7b, 7c
+        $where = ($where1 != null) ? $where1 . ' AND bank_id <> 99999 ': ' WHERE bank_id <> 99999';
+        $sql = "SELECT bank_id, bank_name, COUNT(*) AS total FROM view_retail_finance {$where} GROUP BY 1,2 ORDER BY 1,2";
+        $results = $this->db->query($sql)->result_array();
+
+        foreach ($results as $key=>$row) {
+            $percent = 0;
+            if ($totalMemberBank > 0) {
+                $percent = number_format(($row['total']/$totalMemberBank)*100, 2);
+            }
+
+            $table[] = array(
+                        'SN'                    => '', 
+                        'Performance Measure'   =>  chr(65+$key) .') ' . $row['bank_name'], 
+                        'UOM'                   => '%', 
+                        'Target'                => '33',
+                        'Actual'                => $percent,
+                        'Variance'              => abs(33 - $percent)
+                    );
+        }
+
+
+        echo json_encode(array('success' => TRUE, 'data'=> $table));
+
+    }
+}
+
+/**
+1   Overall finance % across dealership(Funding Banks on Retail)    %   80%
+2   Document Completion Date from booking date <10 days(Funding Banks)  Days    10
+3   DO collection date from Document submission confirmation <5 days    Days    5
+    a) Standard Chartered Bank Limited  Days    5
+    b) NIC ASIA Bank Limited    Days    5
+    c) NMB Bank Limited Days    5
+4   Payment collection from security transfer completion date <5 days   Days    5
+    a) Standard Chartered Bank Limited  Days    5
+    b) NIC ASIA Bank Limited    Days    5
+    c) NMB Bank Limited Days    5
+5   Rejection rate <5% of total documents submitted %   5%
+6   Delivery with DO    %   100%
+7   Equal Lead distribution to all tied up Banks (No of Leads forwarded)    %   99%
+    a) Standard Chartered Bank Limited  %   33%
+    b) NIC ASIA Bank Limited    %   33%
+    c) NMB Bank Limited %   33%
+
+**/

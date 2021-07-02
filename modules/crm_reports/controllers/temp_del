@@ -1,0 +1,11 @@
+//OLD
+       /*
+        $sql = <<<EOF
+SELECT
+{$functionName} (
+    $$ WITH cte AS (SELECT {$columns} FROM {$dbview} {$where1} GROUP BY {$sequence} ORDER BY {$sequence} ) TABLE cte UNION ALL SELECT {$group_name}, 'Total' as {$column}, sum(ct) FROM cte GROUP BY 1 ORDER BY 1 $$,
+    $$ (SELECT {$mst_column} as {$column} FROM {$table} {$where2} ORDER BY {$order}) UNION ALL (SELECT DISTINCT 'Total' as {$column} from {$dbview}) $$,
+    'INT',
+    '"{$compare_string}"') AS sqlstring
+EOF;
+*/

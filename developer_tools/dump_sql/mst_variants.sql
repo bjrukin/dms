@@ -1,0 +1,13 @@
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (1, 1, 1, NULL, '2016-6-30 16:51:36', '2016-6-30 16:51:36', NULL, '5 SEAT/AC', 1);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (2, 1, 1, NULL, '2016-6-30 16:51:40', '2016-6-30 16:51:40', NULL, '7 SEATER', 2);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (3, 1, 1, NULL, '2016-6-30 16:51:49', '2016-6-30 16:51:49', NULL, 'LX', 3);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (4, 1, 1, NULL, '2016-6-30 16:51:53', '2016-6-30 16:51:53', NULL, 'LXI', 4);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (5, 1, 1, NULL, '2016-6-30 16:51:55', '2016-6-30 16:51:55', NULL, 'STD', 5);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (6, 1, 1, NULL, '2016-6-30 16:51:59', '2016-6-30 16:51:59', NULL, 'VXI', 6);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (7, 1, 1, NULL, '2016-6-30 16:52:01', '2016-6-30 16:52:01', NULL, 'VXI AMT', 7);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (8, 1, 1, NULL, '2016-6-30 16:52:04', '2016-6-30 16:52:04', NULL, 'Vxi+', 8);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (9, 1, 1, NULL, '2016-6-30 16:52:07', '2016-7-12 16:43:40', NULL, 'ZXI', 9);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (10, 1, 1, NULL, '2016-6-30 16:52:13', '2016-6-30 16:52:13', NULL, 'ZXI(O)', 10);
+INSERT INTO "mst_variants" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (11, 1, 1, NULL, '2016-6-30 16:52:16', '2016-7-12 16:43:58', NULL, 'ZXI (Opt)', 11);
+
+ALTER SEQUENCE mst_variants_id_seq RESTART WITH 12;

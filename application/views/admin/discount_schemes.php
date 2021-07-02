@@ -1,0 +1,335 @@
+<style type="text/css">
+table.form-table td:nth-child(1){
+	width:13%;
+}
+table.form-table td:nth-child(odd){
+	width:13%;
+}
+table.form-table td:nth-child(even){
+	width:20%;
+}
+</style>
+
+<!-- <div id='jqxGridCustomer_followupToolbar' class='grid-toolbar'>
+	<button type="button" class="btn btn-danger btn-flat btn-xs" id="jqxGridCustomer_followupFilterClear"><?php echo lang('general_clear'); ?></button>
+</div> -->
+<div id="jqxGridDiscount_scheme"></div>
+
+<div id="jqxPopupWindowDiscount_scheme">
+	<div class='jqxExpander-custom-div'>
+		<span class='popup_title' id="window_poptup_title"></span>
+	</div>
+	<div class="form_fields_area">
+		<?php echo form_open('', array('id' =>'form-discount_schemes', 'onsubmit' => 'return false')); ?>
+		<input type = "hidden" name = "id" id = "discount_schemes_id"/>
+		<table class="form-table">
+			<tr>
+				<td><label for='remarks'><?php echo lang('remarks')?></label></td>
+				<td><input id='remarks' class='text_input' name='remarks'></td>
+			</tr>
+			<tr>
+				<th colspan="2">
+					<button type="button" class="btn btn-success btn-xs btn-flat" id="jqxDiscount_schemeSubmitButton"><?php echo lang('general_save'); ?></button>
+					<button type="button" class="btn btn-default btn-xs btn-flat" id="jqxDiscount_schemeCancelButton"><?php echo lang('general_cancel'); ?></button>
+				</th>
+			</tr>
+
+		</table>
+		<?php echo form_close(); ?>
+	</div>
+</div>
+<div id="jqxWindowReducedDiscount">
+	<div class='jqxExpander-custom-div'>
+		<span class='popup_title' id="window_poptup_title"><?php echo lang("new_discount") ?></span>
+	</div>
+	<div class="form_fields_area">
+		<!--  -->
+		<?php echo form_open(base_url("admin/discount_schemes/discount_operation/".DISCOUNT_REDUCED), array('id' => 'form-reduced_discount','class' => 'form-horizontal')); ?>
+		<input type="hidden" name="discount_id" id="discount_id">
+		<input type="hidden" name="customer_id"  id="reducedDiscount_customer_id">
+		<div class="form-line">
+			<label><?php echo lang("new_discount") ?></label>
+			<input type="number" name="reduced_discount" id="reduced_discount" class="form-control">
+		</div>
+
+		<div class="form-buttons">
+			<button type="submit" class="btn btn-success btn-flat" id="jqxReducedDiscountSubmitButton"><?php echo lang('general_save'); ?></button>
+			<button type="button" class="btn btn-default btn-flat" id="jqxReducedDiscountCancelButton"><?php echo lang('general_cancel'); ?></button>
+		</div>
+
+		<?php echo form_close(); ?>
+	</div>
+</div>
+
+<script language="javascript" type="text/javascript">
+
+	$(function(){
+
+		var discount_schemesDataSource =
+		{
+			datatype: "json",
+			datafields: [
+			{ name: 'id', type: 'number' },
+			{ name: 'fullname', type: 'string' },
+			{ name: 'created_by', type: 'number' },
+			{ name: 'updated_by', type: 'number' },
+			{ name: 'deleted_by', type: 'number' },
+			{ name: 'created_at', type: 'string' },
+			{ name: 'updated_at', type: 'string' },
+			{ name: 'deleted_at', type: 'string' },
+			{ name: 'actual_price', type: 'number' },
+			{ name: 'discount_request', type: 'number' },
+			{ name: 'vehicle_id', type: 'number' },
+			{ name: 'variant_id', type: 'number' },
+			{ name: 'color_id', type: 'number' },
+			{ name: 'approval', type: 'number' },
+			{ name: 'approved_by', type: 'string' },
+			{ name: 'approved_date', type: 'date' },
+			{ name: 'customer_id', type: 'number' },
+			{ name: 'remarks', type: 'string' },
+			{ name: 'reduced_discount', type: 'string' },
+			{ name: 'designation', type: 'string' },
+			{ name: 'inquiry_no', type: 'string' },
+
+			{ name: 'first_name', type: 'string' },
+			{ name: 'middle_name', type: 'string' },
+			{ name: 'last_name', type: 'string' },
+			{ name: 'vehicle_name', type: 'string' },
+			{ name: 'variant_name', type: 'string' },
+			{ name: 'color_name', type: 'string' },
+
+			{ name: 'staff_limit', type: 'string' },
+			{ name: 'incharge_limit', type: 'string' },
+			{ name: 'sales_head_limit', type: 'string' },
+			{ name: 'user_name', type: 'string' },
+			{ name: 'dealer_name', type: 'string' },
+			
+			],
+			url: '<?php echo site_url("admin/discount_schemes/json"); ?>',
+			pagesize: defaultPageSize,
+			root: 'rows',
+			id : 'id',
+			cache: true,
+			pager: function (pagenum, pagesize, oldpagenum) {
+        	//callback called when a page or page size is changed.
+        },
+        beforeprocessing: function (data) {
+        	discount_schemesDataSource.totalrecords = data.total;
+        },
+	    // update the grid and send a request to the server.
+	    filter: function () {
+	    	$("#jqxGridDiscount_scheme").jqxGrid('updatebounddata', 'filter');
+	    },
+	    // update the grid and send a request to the server.
+	    sort: function () {
+	    	$("#jqxGridDiscount_scheme").jqxGrid('updatebounddata', 'sort');
+	    },
+	    processdata: function(data) {
+	    }
+	};
+	
+	$("#jqxGridDiscount_scheme").jqxGrid({
+		theme: theme,
+		width: '100%',
+		height: gridHeight,
+		source: discount_schemesDataSource,
+		altrows: true,
+		pageable: true,
+		sortable: true,
+		rowsheight: 30,
+		columnsheight:30,
+		showfilterrow: true,
+		filterable: true,
+		columnsresize: true,
+		autoshowfiltericon: true,
+		columnsreorder: true,
+		selectionmode: 'none',
+		virtualmode: true,
+		enableanimations: false,
+		pagesizeoptions: pagesizeoptions,
+		showtoolbar: true,
+		rendertoolbar: function (toolbar) {
+			var container = $("<div style='margin: 5px; height:50px'></div>");
+			container.append($('#jqxGridDiscount_schemeToolbar').html());
+			toolbar.append(container);
+		},
+		columns: [
+		{ text: 'SN', width: 50, pinned: true, exportable: false,  columntype: 'number', cellclassname: 'jqx-widget-header', renderer: gridColumnsRenderer, cellsrenderer: rownumberRenderer , filterable: false},
+		{
+			text: 'Action', datafield: 'action', width:95, sortable:false,filterable:false, pinned:true, align: 'center' , cellsalign: 'center', cellclassname: 'grid-column-center', 
+			cellsrenderer: function (index, row, columnfield, value, defaulthtml, columnproperties) {
+				var e = '<a href="javascript:void(0)" onclick="editDiscount_schemeRecord(' + index + '); return false;" title="Edit"><i class="fa fa-edit"></i></a>';
+				var p = '';
+				var limit;
+
+				<?php if(is_dealer_incharge()){ ?>
+					limit = columnproperties.incharge_limit;
+					<?php }elseif(is_sales_head()){ ?>
+						limit = columnproperties.sales_head_limit;
+						<?php }else{ ?>
+							limit = columnproperties.actual_price;
+							<?php } ?>
+
+							if( columnproperties.discount_request <= limit){
+								p += '<a href="' + base_url + 'admin/discount_schemes/discount_operation/<?php echo DISCOUNT_APPROVED; ?>/' + columnproperties.id + '/'+columnproperties.customer_id+'"><i class="fa fa-fw fa-check"></i></a>&nbsp';
+							}
+							p += '<a href="' + base_url + 'admin/discount_schemes/discount_operation/<?php echo DISCOUNT_REJECTED; ?>/' + columnproperties.id + '/'+columnproperties.customer_id+'"><i class="fa fa-fw fa-times"></i></a>&nbsp';
+							p += '<a href="#jqxGridDiscount" onclick="discount_reduce_window(' +index+ ', '+ columnproperties.id +')"><i class="fa fa-fw fa-chevron-circle-down"></i></a>&nbsp';
+							p += '<a href="' + base_url + 'admin/discount_schemes/discount_operation/<?php echo DISCOUNT_FORWARD; ?>/' + columnproperties.id + '/'+columnproperties.customer_id+'"><i class="fa fa-fw fa-arrow-right"></i></a>&nbsp';
+
+							if(columnproperties.approval == 1)
+							{
+								return "<i class='fa fa-check'></i>";
+							}
+							if(columnproperties.approval == 2)
+							{
+								return "<i class='fa fa-times'></i>";
+							}
+							if(columnproperties.approval == 3)
+							{
+								return "<i class='fa fa-angle-double-down'></i><i class='fa fa-check'></i>";
+							}
+							<?php if(is_sales_executive()){ ?>
+								return '<div style="text-align: center; margin-top: 8px;"> '+ e +' </div>';
+								<?php } ?>
+
+								return '<div style="text-align: center; margin-top: 8px;">' + p + '</div>';
+
+							}
+						},
+						{ text: '<?php echo "Requested By"//lang("created_by"); ?>',datafield: 'fullname',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo lang("inquiry_no"); ?>',datafield: 'inquiry_no',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo "Dealer Name"//lang("dealer_name"); ?>',datafield: 'dealer_name',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo lang("customer_name"); ?>',datafield: 'first_name',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo "Requested Date"//lang("created_at"); ?>',datafield: 'created_at',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo lang("actual_price"); ?>',datafield: 'actual_price',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo lang("discount_request"); ?>',datafield: 'discount_request',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo lang("reduced_discount"); ?>',datafield: 'reduced_discount',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo lang("vehicle_name"); ?>',datafield: 'vehicle_name',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo lang("variant_name"); ?>',datafield: 'variant_name',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo lang("color_name"); ?>',datafield: 'color_name',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo lang("approved_by"); ?>',datafield: 'user_name',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo "Designation"//lang("designation"); ?>',datafield: 'designation',width: 150,filterable: true,renderer: gridColumnsRenderer },
+						{ text: '<?php echo "Remarks"//lang("remarks"); ?>',datafield: 'remarks',width: 150,filterable: true,renderer: gridColumnsRenderer },
+
+						],
+						rendergridrows: function (result) {
+							return result.data;
+						}
+					});
+
+		$("[data-toggle='offcanvas']").click(function(e) {
+			e.preventDefault();
+			setTimeout(function() {$("#jqxGridDiscount_scheme").jqxGrid('refresh');}, 500);
+		});
+
+		$(document).on('click','#jqxGridDiscount_schemeFilterClear', function () { 
+			$('#jqxGridDiscount_scheme').jqxGrid('clearfilters');
+		});
+
+		$(document).on('click','#jqxGridDiscount_schemeInsert', function () { 
+			openPopupWindow('jqxPopupWindowDiscount_scheme', '<?php echo lang("general_add")  . "&nbsp;" .  $header; ?>');
+		});
+
+			// initialize the popup window
+			$("#jqxPopupWindowDiscount_scheme").jqxWindow({ 
+				theme: theme,
+				width: 500,
+				maxWidth: '75%',
+				height: 300,  
+				maxHeight: '75%',  
+				isModal: true, 
+				autoOpen: false,
+				modalOpacity: 0.7,
+				showCollapseButton: false 
+			});
+
+			$("#jqxWindowReducedDiscount").jqxWindow({
+				theme: theme,
+				width: 500,
+				maxWidth: 500,
+				height: 200,
+				maxHeight: 200,
+				isModal: true,
+				autoOpen: false,
+				modalOpacity: 0.7,
+				showCollapseButton: false
+			});
+
+			$("#jqxPopupWindowDiscount_scheme").on('close', function () {
+				reset_form_discount_schemes();
+			});
+
+			$("#jqxReducedDiscountCancelButton").on('click', function () {
+				reset_form_discount_schemes();
+				$('#jqxWindowReducedDiscount').jqxWindow('close');
+			});
+
+			$("#jqxDiscount_schemeCancelButton").on('click', function () {
+				reset_form_discount_schemes();
+				$('#jqxPopupWindowDiscount_scheme').jqxWindow('close');
+			});
+
+
+			$("#jqxDiscount_schemeSubmitButton").on('click', function () {
+				saveDiscount_schemeRecord();
+			});
+		});
+
+		function editDiscount_schemeRecord(index){
+			var row =  $("#jqxGridDiscount_scheme").jqxGrid('getrowdata', index);
+			if (row) {
+				$('#discount_schemes_id').val(row.id);
+				$('#remarks').val(row.remarks);
+				
+				openPopupWindow('jqxPopupWindowDiscount_scheme', '<?php echo lang("general_edit")  . "&nbsp;" .  $header; ?>');
+			}
+		}
+
+		function saveDiscount_schemeRecord(){
+			var data = $("#form-discount_schemes").serialize();
+			
+			$('#jqxPopupWindowDiscount_scheme').block({ 
+				message: '<span>Processing your request. Please be patient.</span>',
+				css: { 
+					width                   : '75%',
+					border                  : 'none', 
+					padding                 : '50px', 
+					backgroundColor         : '#000', 
+					'-webkit-border-radius' : '10px', 
+					'-moz-border-radius'    : '10px', 
+					opacity                 : .7, 
+					color                   : '#fff',
+					cursor                  : 'wait' 
+				}, 
+			});
+
+			$.ajax({
+				type: "POST",
+				url: '<?php echo site_url("admin/discount_schemes/save"); ?>',
+				data: data,
+				success: function (result) {
+					var result = eval('('+result+')');
+					if (result.success) {
+						reset_form_discount_schemes();
+						$('#jqxGridDiscount_scheme').jqxGrid('updatebounddata');
+						$('#jqxPopupWindowDiscount_scheme').jqxWindow('close');
+					}
+					$('#jqxPopupWindowDiscount_scheme').unblock();
+				}
+			});
+		}
+		function reset_form_discount_schemes(){
+			$('#discount_schemes_id').val('');
+			$('#form-discount_schemes')[0].reset();
+		}
+
+		function discount_reduce_window(index, id)
+		{
+			var row =  $("#jqxGridDiscount_scheme").jqxGrid('getrowdata', index);
+
+			$('#discount_id').val(id);
+			$('#reducedDiscount_customer_id').val(row.customer_id);
+			openPopupWindow('jqxWindowReducedDiscount', '<?php echo lang("general_edit")  . "&nbsp;" .  $header; ?>');
+		}
+</script>

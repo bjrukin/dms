@@ -1,0 +1,7 @@
+INSERT INTO "mst_city_places" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "district_id", "mun_vdc_id") VALUES (1, 1, 1, NULL, '2016-7-13 12:16:15', '2016-7-13 12:16:15', NULL, 'Thapathali', 47, 1623);
+INSERT INTO "mst_city_places" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "district_id", "mun_vdc_id") VALUES (2, 1, 1, NULL, '2016-7-13 12:17:09', '2016-7-13 12:17:09', NULL, 'Kapuri', 47, 1623);
+INSERT INTO "mst_city_places" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "district_id", "mun_vdc_id") VALUES (3, 1, 1, NULL, '2016-7-13 12:17:20', '2016-7-13 12:17:20', NULL, 'Pulchowk', 45, 1559);
+INSERT INTO "mst_city_places" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "district_id", "mun_vdc_id") VALUES (4, 1, 1, NULL, '2016-7-13 12:17:33', '2016-7-13 12:17:33', NULL, 'Bhaktapur', 46, 1577);
+INSERT INTO "mst_city_places" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "district_id", "mun_vdc_id") VALUES (5, 1, 1, NULL, '2016-7-13 12:17:49', '2016-7-13 12:17:49', NULL, 'Banepa', 44, 1451);
+
+ALTER SEQUENCE mst_city_places_id_seq RESTART WITH 6;

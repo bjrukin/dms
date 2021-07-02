@@ -1,0 +1,154 @@
+<?php 
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+* PROJECT
+*
+* @package         PROJECT
+* @author          <AUTHOR_NAME>
+* @copyright       Copyright (c) 2016
+*/
+
+// ---------------------------------------------------------------------------
+
+/**
+* Dealer_orders
+*
+* Extends the Project_Controller class
+* 
+*/
+
+class Custom_changes extends Project_Controller
+{
+    protected $uploadPath = 'uploads';        
+    public function __construct()
+    {
+        parent::__construct();
+
+        control('Sparepart Orders');
+
+        $this->load->model('sparepart_orders/sparepart_order_model');
+        $this->load->model('dispatch_spareparts/dispatch_sparepart_model');
+        $this->load->model('sparepart_stocks/sparepart_stock_model');
+        $this->load->model('spareparts/sparepart_model');
+        $this->lang->load('sparepart_orders/sparepart_order');
+        $this->load->library('sparepart_orders/sparepart_order');    
+        $this->load->model('dealer_credits/dealer_credit_model');
+        $this->load->model('dealer_stocks/dealer_stock_model');
+        $this->load->model('order_unavailables/order_unavailable_model');
+        $this->load->model('picklists/picklist_model');
+        $this->load->model('foc_documents/foc_document_model');
+        $this->load->model('foc_accessoreis_partcodes/foc_accessoreis_partcode_model');
+        $this->load->model('dispatch_lists/dispatch_list_model');
+        $this->load->model('dealer_stocks/dealer_stock_model');
+        $this->load->model('stock_yards/stock_yard_model');
+        $this->load->model('spareparts_dealer_claims/spareparts_dealer_claim_model');
+        $this->load->model('users/user_model');
+        $this->load->model('dealers/dealer_model');
+        $this->load->model('spareparts_dealer_opening_credits/spareparts_dealer_opening_credit_model');
+    }
+
+    public function index()
+    {
+        $dealers = $this->dealer_model->findAll();
+
+        $data['header'] = lang('sparepart_orders');
+        $data['page'] = $this->config->item('template_admin') . "/custom_change/index";
+        $data['module'] = 'sparepart_orders';
+
+        $this->load->view($this->_container,$data);
+
+    }
+
+    public function save_recent_dispatch()
+    {
+        $data = array();
+        $dealer_id = $this->input->post('dealer_id');
+        $grid_data = $this->input->post('grid_data');
+        $dispatched_date = '2020-07-16';
+
+        $this->dispatch_sparepart_model->_table = "view_spareparts_recent_dispatch_list";
+        $grid_data = $this->dispatch_sparepart_model->findAll(array('dealer_id'=>$dealer_id,'grn_received_date'=>NULL, 'dispatched_date <' => $dispatched_date));
+
+        $this->db->select_max('grn_no');
+        $grn_no = $this->db->get('spareparts_dispatch_spareparts')->row();
+        $grn_no = ((($grn_no->grn_no)?$grn_no->grn_no:0) + 1);
+
+                // echo '<pre>'; print_r($grid_data); exit;
+        
+        // $defecit_quantity = array();
+
+        foreach ($grid_data as $key => $value) 
+        {
+            if(isset($value['available'])){
+                if(isset($value['order_no']))
+                {
+                    $order_no = $value['order_no'];
+                }
+                $bill_no = $value['bill_no'];
+                // if(array_key_exists('received_quantity', $value) && ($value['received_quantity'] != '' || $value['received_quantity'] != null))
+                // {
+                //     $total_dispatched = $value['received_quantity'];
+                //     $defecit_quantity[] = array('quantity' => $value['total_dispatched'] - $value['received_quantity'],
+                //         'sparepart_id' => $value['sparepart_id']);
+
+                // }
+                // else
+                // {
+                    $total_dispatched = $value['total_dispatched'];
+                // }
+
+
+
+                $this->dispatch_sparepart_model->_table = "view_dispatch_spareparts";
+                $dispatch = $this->dispatch_sparepart_model->findAll(array('bill_no'=>$bill_no,'sparepart_id'=>$value['sparepart_id'],'grn_received_date'=>NULL),NULL,NULL,NULL,$total_dispatched);
+
+                if($dispatch)
+                {
+                    foreach ($dispatch as $k => $v) {
+                        $data[] = array(
+                            'id' => $v->id,
+                            'grn_no' => $grn_no,
+                            'grn_received_date' => $this->input->post('received_date'),
+                            'grn_received_date_np' => get_nepali_date($this->input->post('received_date'),'nep')
+                        );
+                    }
+                }
+                
+            }
+        }
+
+        // if($defecit_quantity)
+        // {
+        //     $this->dispatch_sparepart_model->_table = "view_dispatch_spareparts";
+        //     foreach ($defecit_quantity as $key => $val) {
+        //         $defecit_items = $this->dispatch_sparepart_model->find(array('bill_no'=>$bill_no,'sparepart_id'=>$val['sparepart_id'],'grn_received_date'=>NULL));
+        //         $insert_claim = array(
+        //             'dealer_id' => $defecit_items->dealer_id,
+        //             'sparepart_id' => $defecit_items->sparepart_id,
+        //             'defecit_quantity' => $val['quantity'],
+        //             'requested_by' => $this->session->userdata('id'),
+        //             'requested_date' => date('Y-m-d'),
+        //             'requested_date_np' => get_nepali_date(date('Y-m-d'),'nep')
+        //         );
+        //         $this->spareparts_dealer_claim_model->insert($insert_claim);
+        //     }
+        // }
+
+        $success = $this->db->update_batch('spareparts_dispatch_spareparts',$data,'id'); 
+        
+        if($success)
+        {
+            $success = TRUE;
+            $msg=lang('general_success');
+        }
+        else
+        {
+            $success = FALSE;
+            $msg=lang('general_failure');
+        }
+
+        echo json_encode(array('msg'=>$msg,'success'=>$success));
+        exit;
+    }
+}

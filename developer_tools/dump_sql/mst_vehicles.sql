@@ -1,0 +1,14 @@
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (1, 1, 1, NULL, '2016-6-30 16:46:27', '2016-6-30 16:46:27', NULL, 'ALTO 800', 1);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (2, 1, 1, NULL, '2016-6-30 16:46:34', '2016-6-30 16:46:34', NULL, 'ASTAR', 2);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (3, 1, 1, NULL, '2016-6-30 16:46:42', '2016-6-30 16:46:42', NULL, 'CELERIO', 3);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (4, 1, 1, NULL, '2016-6-30 16:46:49', '2016-6-30 16:46:49', NULL, 'CIAZ', 4);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (5, 1, 1, NULL, '2016-6-30 16:46:56', '2016-6-30 16:46:56', NULL, 'DZIRE', 5);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (6, 1, 1, NULL, '2016-6-30 16:47:03', '2016-6-30 16:47:03', NULL, 'EECO', 6);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (7, 1, 1, NULL, '2016-6-30 16:47:10', '2016-6-30 16:47:10', NULL, 'ERTIGA', 7);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (8, 1, 1, NULL, '2016-6-30 16:47:14', '2016-6-30 16:47:14', NULL, 'K10', 8);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (9, 1, 1, NULL, '2016-6-30 16:47:17', '2016-6-30 16:47:17', NULL, 'OMNI CARGO', 9);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (10, 1, 1, NULL, '2016-6-30 16:47:20', '2016-6-30 16:47:20', NULL, 'OMNI VAN', 10);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (11, 1, 1, NULL, '2016-6-30 16:47:22', '2016-6-30 16:47:22', NULL, 'SWIFT', 11);
+INSERT INTO "mst_vehicles" ("id", "created_by", "updated_by", "deleted_by", "created_at", "updated_at", "deleted_at", "name", "rank") VALUES (12, 1, 1, NULL, '2016-6-30 16:48:40', '2016-7-12 16:43:30', NULL, 'WAGON R', 12);
+
+ALTER SEQUENCE mst_vehicles_id_seq RESTART WITH 13;

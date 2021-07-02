@@ -1,0 +1,147 @@
+<?php 
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * PROJECT
+ *
+ * @package         PROJECT
+ * @author          <AUTHOR_NAME>
+ * @copyright       Copyright (c) 2016
+ */
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Crm_reports
+ *
+ * Extends the Report_Controller class
+ * 
+ */
+
+class Crm_reports extends Report_Controller
+{
+	public function __construct()
+	{
+    	parent::__construct();
+
+    	control('CRM Reports');
+
+        $this->lang->load('crm_reports/crm_report');
+    }
+
+	public function index()
+	{
+		// Display Page
+		$data['header'] = lang('crm_reports');
+		$data['page'] = $this->config->item('template_admin') . "index";
+		$data['module'] = 'crm_reports';
+		$this->load->view($this->_container,$data);
+	}
+
+    public function enquiry_source() {
+        // Display Page
+        $data['header'] = lang('crm_reports');
+        $data['page'] = $this->config->item('template_admin') . "enquiry_source";
+        $data['module'] = 'crm_reports';
+        $this->load->view($this->_container,$data);
+    }
+
+    public function generate() {
+        // Display Page
+        $data['header'] = lang('crm_reports');
+        $data['page'] = $this->config->item('template_admin') . "generate";
+        $data['module'] = 'crm_reports';
+        $this->load->view($this->_container,$data);
+    }
+
+    public function get_report_json() {
+
+        $column = $this->input->post('report_criteria'); 
+
+        $group_name = $group = $this->input->post('group_criteria');
+
+        $column_name = trim(ucwords(str_replace('name', '', str_replace("_", " ", $column))));
+
+        $group_name_label = trim(ucwords(str_replace('name', '', str_replace("_", " ", $group_name))));
+
+        $whereCondition = array();
+
+        $where = null;
+
+        if($this->input->post('date_range')) {
+            $date_range = explode(" - ", $this->input->post('date_range'));
+            if ($date_range[0] != null && $date_range[1] != null) {
+                $whereCondition[] = "(inquiry_date_en >= '".$date_range[0]."' AND inquiry_date_en <= '".$date_range[1]."')";
+            }
+        }
+
+        if ($group == 'month') {
+            $group = "to_char(date(inquiry_date_en),'YYYY-MM') as month";
+        }
+
+        // ACCESS LEVEL CHECK STARTS
+
+        $is_dealer_only = NULL;
+    
+        $dealer_list    = (is_dealer_incharge()) ? get_dealer_list() : NULL; 
+        
+        if (empty($dealer_list)) {
+            $is_dealer_only = (is_dealer_only()) ? TRUE : NULL; 
+        }
+        
+        if(!empty($dealer_list)) {
+            $whereCondition[] = "( dealer_id  IN (" . implode(", ", $dealer_list) . ") ) ";
+        } elseif ($is_dealer_only) {
+            $whereCondition[] = " ( dealer_id = " . $this->session->userdata('employee')['dealer_id'] . ")";
+        }
+
+        // ACCESS LEVEL CHECK ENDS
+
+        if (!empty($whereCondition)) {
+            $where = " WHERE " . implode(" AND " , $whereCondition);
+        }
+        
+        $columns  = "{$group}, {$column}, count(id) as ct";
+        $sequence = "1, 2";
+
+        $string = "";
+
+        $functionName = 'generate_crosstab_sql';
+
+        if ($this->input->post('export')) {
+            $functionName = 'generate_crosstab_sql_excel';
+        }
+
+        $sql = <<<EOF
+SELECT
+{$functionName} (
+    $$ WITH cte AS (SELECT {$columns} FROM view_customers {$where} GROUP BY {$sequence} ORDER BY {$sequence} ) TABLE cte UNION ALL SELECT {$group_name}, 'Total' as {$column}, sum(ct) FROM cte GROUP BY 1 ORDER BY 1 $$,
+    $$ (SELECT DISTINCT {$column} FROM view_customers ORDER BY 1) UNION ALL (SELECT DISTINCT 'Total' as {$column} from view_customers) $$,
+    'INT',
+    '"{$group_name_label} \ {$column_name}"') AS sqlstring
+EOF;
+
+        $res = $this->db->query($sql)->row_array();
+        $results = $this->db->query($res['sqlstring']);
+        
+        $records = null;
+        if ($results->num_rows() > 0) {
+           $records = $results->result_array();
+           $success = true;
+        } else{
+            $success = false;
+        }
+
+        
+        if ($this->input->post('export')) {
+            $date_range = $this->input->post('date_range');
+            $title = trim("{$group_name_label} VS {$column_name} {$date_range}");
+            $this->export_file($records, $title);
+            exit;
+        } 
+        else {
+            echo json_encode(array('success' => $success, 'data' => $records, 'total'=>count($records)));
+            exit;    
+        }
+    } 
+}
