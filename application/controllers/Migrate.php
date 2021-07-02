@@ -200,17 +200,22 @@ class Migrate extends MX_Controller
         }
     }
 
-    public function make_db($value='')
+    public function make_db($value='', $file="false")
     {
         $view_sql = file_get_contents(FCPATH . 'sql/'. $value . '.sql');
-        $view_sql = str_replace('\r\n', ' ', $view_sql);
-        
-        $queries = explode(';', $view_sql);
+        if(!$file){
+            $view_sql = str_replace('\r\n', ' ', $view_sql);
+            
+            $queries = explode(';', $view_sql);
 
-        foreach ($queries as $q) {
-            if (trim($q) != '') {
-                $this->db->query($q);
+            foreach ($queries as $q) {
+                if (trim($q) != '') {
+                    $this->db->query($q);
+                }
             }
+
+        }else{
+            $this->db->query($view_sql);
         }
 
         echo 'complete';
