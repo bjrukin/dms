@@ -200,7 +200,7 @@ class Migrate extends MX_Controller
         }
     }
 
-    public function make_db($value='', $file="false")
+    public function make_db($value='', $file=FALSE)
     {
         $view_sql = file_get_contents(FCPATH . 'sql/'. $value . '.sql');
         if(!$file){
